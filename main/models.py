@@ -40,7 +40,6 @@ class Product(models.Model):
       main_image = models.ImageField(upload_to='products/')
       created_at = models.DateTimeField(auto_now_add=True)
       updated_at = models.DateTimeField(auto_now=True)
-
       
       def save(self, *args, **kwargs):
             if not self.slug:
