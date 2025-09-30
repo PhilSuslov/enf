@@ -97,7 +97,7 @@
                         {% if not product.product_sizes.all %}disabled{% endif %}>
                     ADD TO CART
                 </button>
-                
+
                 <button class="w-full border border-gray-300 py-3 px-6 text-sm font-medium hover:border-gray-900 transition-colors">
                     ADD TO WISHLIST
                 </button>
@@ -193,7 +193,53 @@
             console.log('No valid size selected');
         }
     }
-    
+
+    function addToCart() {
+        const productSlug = '{{ product.slug }}';
+        console.log('Product Slug:', productSlug);
+        
+        // Update selected size before sending
+        updateSelectedSize();
+        console.log('Selected Size ID:', selectedSizeId);
+
+        if (!selectedSizeId) {
+            showNotification('Please select a size');
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append('size_id', selectedSizeId);
+        formData.append('quantity', '1');
+        fetch(`{% url 'cart:add_to_cart' 'PLACEHOLDER' %}`.replace('PLACEHOLDER', productSlug), {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            console.log('Response Status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response Data:', data);
+            if (data.error) {
+                showNotification(data.error);
+            } else {
+                updateHeaderCartCount(data.total_items);
+                showNotification(data.message);
+                htmx.ajax('GET', '{% url "cart:cart_modal" %}', {
+                    target: '#cart-container',
+                    swap: 'innerHTML'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error adding to cart');
+        });
+    }
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -208,7 +254,7 @@
         }
         return cookieValue;
     }
-    
+
     function showNotification(message) {
         const notification = document.createElement('div');
         notification.className = 'fixed top-20 right-4 bg-black text-white px-6 py-3 rounded shadow-lg z-50 transform translate-x-full transition-transform duration-300';
@@ -288,4 +334,3 @@
             this.style.transform = 'translateY(0)';
         });
     });
-</script>
