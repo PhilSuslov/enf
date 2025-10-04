@@ -24,7 +24,7 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
 
     def clean_email(self):
-        email = self.cleaned_date.get('email')
+        email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('This email is already in use.')
         return email
@@ -44,7 +44,7 @@ class CustomUserLoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500', 'placeholder': 'PASSWORD'})
     )
 
-    def cleam(self):
+    def clean(self):
         email = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
 
